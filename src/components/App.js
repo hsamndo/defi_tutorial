@@ -1,10 +1,12 @@
 import React, { Component } from 'react'
 import Navbar from './Navbar'
+import Main from "./Main"
 import DaiToken from "../abis/DaiToken.json"
 import DappToken from "../abis/DappToken.json"
 import TokenFarm from "../abis/TokenFarm.json"
 import './App.css'
 import Web3 from 'web3'
+
 
 class App extends Component {
 
@@ -47,12 +49,12 @@ class App extends Component {
     const tokenFarmData = TokenFarm.networks[networkId]
     if (tokenFarmData) {
       const tokenFarm = new web3.eth.Contract(TokenFarm.abi, tokenFarmData.address)
-      this.setState({ tokenFarmData })
+      this.setState({ tokenFarm })
       let stakingBalance = await tokenFarm.methods.stakingBalance(this.state.account).call()
       this.setState({ stakingBalance: stakingBalance.toString() })
     } else {
       window.alert('TokenFarm contract not deployed to detected network')
-    }
+    } 
 
     this.setState({ loading: false })
   }
@@ -70,6 +72,22 @@ class App extends Component {
     }
   }
 
+  stakeTokens = (amount) => {
+    this.setState({ loading: true })
+    this.state.daiToken.methods.approve(this.state.tokenFarm._address, amount).send({ from: this.state.account }).on('transactionHash', (hash) => {
+      this.state.tokenFarm.methods.stakeTokens(amount).send({ from: this.state.account }).on('transactionHash', (hash) => {
+        this.setState({ loading: false })
+      })
+    })
+  }
+
+  unstakeTokens = () => {
+    this.setState({ loading: true })
+    this.state.tokenFarm.methods.unstakeTokens().send({ from: this.state.account }).on('transactionHash', (hash) => {
+      this.setState({ loading: false })
+    })
+  }
+
   constructor(props) {
     super(props)
     this.state = {
@@ -85,6 +103,20 @@ class App extends Component {
   }
 
   render() {
+
+    let content 
+    if (this.state.loading) {
+      content = <p id="loader" className="text-center">Loading...</p>
+    } else {
+      content = <Main 
+        daiTokenBalance={this.state.daiTokenBalance}
+        dappTokenBalance={this.state.dappTokenBalance}
+        stakingBalance={this.state.stakingBalance}
+        stakeTokens={this.stakeTokens}
+        unstakeTokens={this.unstakeTokens}
+      />
+    }
+
     return (
       <div>
         <Navbar account={this.state.account} />
@@ -99,7 +131,7 @@ class App extends Component {
                 >
                 </a>
 
-                <h1>Hello, World!</h1>
+                { content }
 
               </div>
             </main>

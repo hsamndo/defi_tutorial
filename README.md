@@ -10,7 +10,6 @@
 ## Build
 
 Install Dependencies
-
 ```
 $ npm install
 ```
@@ -30,3 +29,12 @@ Deploy
 $ truffle migrate
 ```
 
+Start Frontend
+```
+$ npm run start
+```
+
+Mint the earned tokens to the stakers
+```
+$ truffle exec scripts/issue-token.js
+```
