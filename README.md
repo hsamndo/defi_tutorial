@@ -14,3 +14,19 @@ Install Dependencies
 ```
 $ npm install
 ```
+
+Test
+```
+$ truffle test
+```
+
+Compile
+```
+$ truffle compile
+```
+
+Deploy
+```
+$ truffle migrate
+```
+
